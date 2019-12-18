@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formCustomer = document.getElementById('form-customer'),
         ordersTable = document.getElementById('orders'),
         modalOrder = document.getElementById('order_read'),
-        modalOrderActive = document.getElementById('order_active');
+        modalOrderActive = document.getElementById('order_active'),
+        closeBtn = document.querySelector('.close');
   
   const orders = [];
     
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     orders.forEach((order, i) => {
       const dateOrder = new Date(Date.parse(order.deadline))
-  .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
+            .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
 
       ordersTable.innerHTML += `
       <tr class="order" data-number-order="${i}">
@@ -35,10 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const openModal = (numberOrder) => {
     const order = orders[numberOrder];
-    console.log('order: ', order);
     const modal = order.active ? modalOrderActive : modalOrder;
     const dateOrder = new Date(Date.parse(order.deadline))
-  .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
+          .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
 
     const titleBlock = document.querySelector('.modal-title'),
           firstNameBlock = document.querySelector('.firstName'),
@@ -49,17 +49,23 @@ document.addEventListener('DOMContentLoaded', () => {
           countBlock = document.querySelector('.count'),
           phoneBlock = document.querySelector('.phone');
 
-          
+
           titleBlock.textContent = order.title;
           firstNameBlock.textContent = order.firstName;
-          emailBlock.innerHTML = `<a class="email" href="mailto:${order.email}">${order.email}</a>`;
+          emailBlock.textContent = order.email;
+          emailBlock.setAttribute('href', `mailto:${order.email}`);
           descriptionBlock.textContent = order.description;
           deadlineBlock.textContent = dateOrder;
-          currencyBlock.innerHTML = `<span class="${order.currency}"></span>`;
+          currencyBlock.classList.add(order.currency);
           countBlock.textContent = order.amount;
-          phoneBlock.innerHTML = `<a class="phone text-white" href="tel:${order.phone}">Связаться</a>`;
+          phoneBlock.setAttribute('href', `tel:${order.phone}`);
 
     modal.style.display = 'block';
+
+    closeBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
   };
 
   ordersTable.addEventListener('click', event => {
