@@ -19,8 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const calcDeadline = (deadline) => {
-    const day = '10 дней';
-    return day;
+    const targetDate = new Date(deadline);
+    const curDate = new Date();
+    const day = Math.ceil(Math.abs(curDate - targetDate) / (1000 * 3600 * 24));
+
+    const declOfNum = (n, t) => t[ (n%100>4 && n%100<20)? 2 : [2, 0, 1, 1, 1, 2][(n%10<5)?n%10:5] ];
+
+    return day + ' ' + declOfNum(day, ['день', 'дня', 'дней']);
   };
 
   const renderOrders = () => {
@@ -28,15 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ordersTable.textContent = '';
 
     orders.forEach((order, i) => {
-      const dateOrder = new Date(Date.parse(order.deadline))
-            .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
+      // const dateOrder = new Date(Date.parse(order.deadline))
+      //       .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
 
       ordersTable.innerHTML += `
       <tr class="order ${order.active ? 'taken' : ''}" data-number-order="${i}">
         <td>${i+1}</td>
         <td>${order.title}</td>
         <td class="${order.currency}"></td>
-        <td>${dateOrder}</td>
+        <td>${calcDeadline(order.deadline)}</td>
       </tr>
     `;
     });
@@ -80,8 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const { title, firstName, email, description, deadline, currency, amount, phone, active = false } = order;
 
     const modal = active ? modalOrderActive : modalOrder;
-    const dateOrder = new Date(Date.parse(deadline))
-          .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
+    // const dateOrder = new Date(Date.parse(deadline))
+    //       .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
 
     const titleBlock = modal.querySelector('.modal-title'),
           firstNameBlock = modal.querySelector('.firstName'),
@@ -98,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     emailBlock.textContent = email;
     emailBlock.href = 'mailto:' + email;
     descriptionBlock.textContent = description;
-    deadlineBlock.textContent = dateOrder;
+    deadlineBlock.textContent = calcDeadline(order.deadline);
     currencyBlock.className = 'currency_img';
     currencyBlock.classList.add(currency);
     countBlock.textContent = amount;
