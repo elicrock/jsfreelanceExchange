@@ -10,11 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
         formCustomer = document.getElementById('form-customer'),
         ordersTable = document.getElementById('orders'),
         modalOrder = document.getElementById('order_read'),
-        modalOrderActive = document.getElementById('order_active'),
-        closeBtn = document.querySelector('.close');
+        modalOrderActive = document.getElementById('order_active');
   
-  const orders = [];
+  const orders = JSON.parse(localStorage.getItem('freeOrders')) || [];
     
+  const toStorage = () => {
+    localStorage.setItem('freeOrders', JSON.stringify(orders));
+  };
+
+  const calcDeadline = (deadline) => {
+    const day = '10 дней';
+    return day;
+  };
+
   const renderOrders = () => {
     
     ordersTable.textContent = '';
@@ -24,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
 
       ordersTable.innerHTML += `
-      <tr class="order" data-number-order="${i}">
+      <tr class="order ${order.active ? 'taken' : ''}" data-number-order="${i}">
         <td>${i+1}</td>
         <td>${order.title}</td>
         <td class="${order.currency}"></td>
@@ -34,37 +42,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  const handlerModal = (event) => {
+    const target = event.target;
+    const modal = target.closest('.order-modal');
+    const order = orders[modal.id];
+
+    const baseAction = () => {
+      modal.style.display = 'none';
+      toStorage();
+      renderOrders();
+    };
+
+    if (target.closest('.close') || target === modal) {
+      modal.style.display = 'none';
+    }
+
+    if (target.classList.contains('get-order')) {
+      order.active = true;
+      baseAction();
+    }
+
+    if (target.id === 'capitulation') {
+      order.active = false;
+      baseAction();
+    }
+
+    if (target.id === 'ready') {
+      orders.splice(orders.indexOf(order), 1);
+      baseAction();
+    }
+
+  };
+
   const openModal = (numberOrder) => {
-    const order = orders[numberOrder];
-    const modal = order.active ? modalOrderActive : modalOrder;
-    const dateOrder = new Date(Date.parse(order.deadline))
+    const order = orders[numberOrder];  
+
+    const { title, firstName, email, description, deadline, currency, amount, phone, active = false } = order;
+
+    const modal = active ? modalOrderActive : modalOrder;
+    const dateOrder = new Date(Date.parse(deadline))
           .toLocaleDateString("ru", {day: 'numeric', month: 'numeric', year: 'numeric',});
 
-    const titleBlock = document.querySelector('.modal-title'),
-          firstNameBlock = document.querySelector('.firstName'),
-          emailBlock = document.querySelector('.email'),
-          descriptionBlock = document.querySelector('.description'),
-          deadlineBlock = document.querySelector('.deadline'),
-          currencyBlock = document.querySelector('.currency_img'),
-          countBlock = document.querySelector('.count'),
-          phoneBlock = document.querySelector('.phone');
+    const titleBlock = modal.querySelector('.modal-title'),
+          firstNameBlock = modal.querySelector('.firstName'),
+          emailBlock = modal.querySelector('.email'),
+          descriptionBlock = modal.querySelector('.description'),
+          deadlineBlock = modal.querySelector('.deadline'),
+          currencyBlock = modal.querySelector('.currency_img'),
+          countBlock = modal.querySelector('.count'),
+          phoneBlock = modal.querySelector('.phone');
 
+    modal.id = numberOrder;
+    titleBlock.textContent = title;
+    firstNameBlock.textContent = firstName;
+    emailBlock.textContent = email;
+    emailBlock.href = 'mailto:' + email;
+    descriptionBlock.textContent = description;
+    deadlineBlock.textContent = dateOrder;
+    currencyBlock.className = 'currency_img';
+    currencyBlock.classList.add(currency);
+    countBlock.textContent = amount;
+    phoneBlock ? phoneBlock.href = 'tel:' + phone : '';
 
-          titleBlock.textContent = order.title;
-          firstNameBlock.textContent = order.firstName;
-          emailBlock.textContent = order.email;
-          emailBlock.setAttribute('href', `mailto:${order.email}`);
-          descriptionBlock.textContent = order.description;
-          deadlineBlock.textContent = dateOrder;
-          currencyBlock.classList.add(order.currency);
-          countBlock.textContent = order.amount;
-          phoneBlock.setAttribute('href', `tel:${order.phone}`);
+    modal.style.display = 'flex';
 
-    modal.style.display = 'block';
-
-    closeBtn.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
+    modal.addEventListener('click', handlerModal);
 
   };
 
@@ -141,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // }
 
     orders.push(obj);
-    // console.log(orders);
+    toStorage();
   });
 
   
