@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const remaining = (deadline - toDay) / 1000 / 60 / 60;
 
-    if (remaining / 24 > 1) {
+    if (remaining / 24 > 2) {
       return declOfNum(Math.floor(remaining / 24), ['день', 'дня', 'дней']);
     }
 
