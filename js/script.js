@@ -18,14 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('freeOrders', JSON.stringify(orders));
   };
 
-  const calcDeadline = (deadline) => {
-    const targetDate = new Date(deadline);
-    const curDate = new Date();
-    const day = Math.ceil(Math.abs(curDate - targetDate) / (1000 * 3600 * 24));
+  const declOfNum = (number, titles) =>
+        number + ' ' + titles[(number % 100 > 4 && number % 100 < 20) ?
+          2 : [2, 0, 1, 1, 1, 2][(number % 10 < 5) ? number % 10 : 5]];
 
-    const declOfNum = (n, t) => t[ (n%100>4 && n%100<20)? 2 : [2, 0, 1, 1, 1, 2][(n%10<5)?n%10:5] ];
+  const calcDeadline = (date) => {
+    const deadline = new Date(date);
+    const toDay = Date.now();
+    
+    const remaining = (deadline - toDay) / 1000 / 60 / 60;
 
-    return day + ' ' + declOfNum(day, ['день', 'дня', 'дней']);
+    if (remaining / 24 > 2) {
+      return declOfNum(Math.floor(remaining / 24), ['день', 'дня', 'дней']);
+    }
+
+    return declOfNum(Math.floor(remaining), ['час', 'часа', 'часов']);
+
   };
 
   const renderOrders = () => {
@@ -129,6 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   customer.addEventListener('click', () => {
     blockChoice.style.display = 'none';
+    const today = new Date().toISOString().substring(0, 10);
+    document.getElementById('deadline').min = today;
     blockCustomer.style.display = 'block';
     btnExit.style.display = 'block';
   });
