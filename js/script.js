@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formCustomer = document.getElementById('form-customer'),
         ordersTable = document.getElementById('orders'),
         modalOrder = document.getElementById('order_read'),
-        modalOrderActive = document.getElementById('order_active');
+        modalOrderActive = document.getElementById('order_active'),
+        headTable = document.getElementById('headTable');
   
   const orders = JSON.parse(localStorage.getItem('freeOrders')) || [];
     
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const remaining = (deadline - toDay) / 1000 / 60 / 60;
 
-    if (remaining / 24 > 2) {
+    if (remaining / 24 > 1) {
       return declOfNum(Math.floor(remaining / 24), ['день', 'дня', 'дней']);
     }
 
@@ -123,6 +124,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   };
 
+  const sortOrder = (arr, property) => {
+    arr.sort((a, b) => a[property] > b[property] ? 1 : -1);
+  };
+
+  headTable.addEventListener('click', (event) => {
+    const target = event.target;
+
+    if (target.classList.contains('head-sort')) {
+      if (target.id === 'taskSort') {
+        sortOrder(orders, 'title');
+      }
+      if (target.id === 'currencySort') {
+        sortOrder(orders, 'currency');
+      }
+      if (target.id === 'deadlineSort') {
+        sortOrder(orders, 'deadline');
+      }
+      toStorage();
+      renderOrders();
+    }
+
+  });
+
   ordersTable.addEventListener('click', event => {
     const target = event.target;
 
@@ -138,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
   customer.addEventListener('click', () => {
     blockChoice.style.display = 'none';
     const today = new Date().toISOString().substring(0, 10);
+    document.getElementById('deadline').valueAsDate = new Date();
     document.getElementById('deadline').min = today;
     blockCustomer.style.display = 'block';
     btnExit.style.display = 'block';
@@ -173,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     formCustomer.reset();
+    document.getElementById('deadline').valueAsDate = new Date();
 
     // filter
     // const elements = [...formCustomer.elements]
